@@ -6,11 +6,12 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
-export const authOptions = {
+// DO NOT export authOptions here!
+const authOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,      // ← Changed from BETTERAUTH_GOOGLE_CLIENT_ID
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!, // ← Changed from BETTERAUTH_GOOGLE_CLIENT_SECRET
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -27,12 +28,12 @@ export const authOptions = {
           .where(eq(users.email, credentials.email))
           .limit(1);
         const user = userResult[0];
-        if (!user) return null;
+        if (!user || !user.passwordHash) return null;
 
-        const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+          const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!isValid) return null;
 
-        // Return user info for session
+
         return {
           id: user.id.toString(),
           email: user.email,
@@ -42,7 +43,7 @@ export const authOptions = {
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET!,  // ← Changed from BETTERAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET!,
   session: {
     strategy: "jwt" as const,
   },

@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1757173089716,
+      "tag": "0000_kind_quasar",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1757186302328,
+      "tag": "0001_thankful_frank_castle",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757361879129,
+      "tag": "0002_striped_young_avengers",
+      "breakpoints": true
+    }
+  ]
+}

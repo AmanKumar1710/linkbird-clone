@@ -3,14 +3,28 @@ import { db } from "@/lib/db";
 import { campaigns } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const result = await db.select().from(campaigns).where(eq(campaigns.id, params.id)).limit(1);
+// Helper to extract [id] param from the URL
+function getIdFromRequest(request: Request): string | null {
+  const url = new URL(request.url);
+  // Matches: .../api/campaigns/{id}
+  const match = url.pathname.match(/\/api\/campaigns\/([^/]+)/);
+  return match ? match[1] : null;
+}
+
+export async function GET(request: Request) {
+  const id = getIdFromRequest(request);
+  if (!id) return NextResponse.json({ error: "Invalid campaign id" }, { status: 400 });
+
+  const result = await db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1);
   const campaign = result[0] || null;
   if (!campaign) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(campaign);
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request) {
+  const id = getIdFromRequest(request);
+  if (!id) return NextResponse.json({ error: "Invalid campaign id" }, { status: 400 });
+
   const json = await request.json();
   if (!json.name || !json.status) {
     return NextResponse.json({ error: "Name and status required" }, { status: 400 });
@@ -20,12 +34,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     name: json.name,
     status: json.status,
     updatedAt: new Date(),
-  }).where(eq(campaigns.id, params.id)).returning();
+  }).where(eq(campaigns.id, id)).returning();
 
   return NextResponse.json(result);
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  await db.delete(campaigns).where(eq(campaigns.id, params.id));
+export async function DELETE(request: Request) {
+  const id = getIdFromRequest(request);
+  if (!id) return NextResponse.json({ error: "Invalid campaign id" }, { status: 400 });
+
+  await db.delete(campaigns).where(eq(campaigns.id, id));
   return NextResponse.json({ success: true });
 }
